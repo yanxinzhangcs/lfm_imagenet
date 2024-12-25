@@ -25,6 +25,8 @@ class AdaptiveLinear(nn.Module):
         # Linear transformation for adapting the weight based on input
         self.adapt = nn.Linear(adapt_dim, out_features * in_features)
 
+        #self.activation = nn.GELU()
+
     def forward(
         self, x: torch.Tensor, adapt_input: torch.Tensor
     ) -> torch.Tensor:
@@ -97,6 +99,7 @@ class MixtureOfExperts(nn.Module):
             ]
         )
         self.gating = nn.Linear(adapt_dim, num_experts)
+        #self.activation = nn.GELU() 
 
     def forward(
         self, x: torch.Tensor, adapt_input: torch.Tensor
@@ -242,32 +245,32 @@ if __name__ == "__main__":
     output = model(input_tensor)
     logger.info("Model forward pass complete.")
 
-def test_inference(model, dataloader, device):
-    model.eval()  # 切换到推理模式
-    with torch.no_grad():  # 禁用梯度计算
-        for inputs, _ in dataloader:
-            inputs = inputs.to(device)
+# def test_inference(model, dataloader, device):
+#     model.eval()  # 切换到推理模式
+#     with torch.no_grad():  # 禁用梯度计算
+#         for inputs, _ in dataloader:
+#             inputs = inputs.to(device)
 
-            print("Testing inference...")
-            # 检查输入是否有 NaN
-            if torch.isnan(inputs).any():
-                print("NaN detected in inputs!")
-                return
+#             print("Testing inference...")
+#             # 检查输入是否有 NaN
+#             if torch.isnan(inputs).any():
+#                 print("NaN detected in inputs!")
+#                 return
 
-            # 前向传播并检查每层输出
-            x = inputs
-            for name, module in model.named_children():
-                try:
-                    x = module(x)
-                except Exception as e:
-                    print(f"Error in module {name}: {e}")
-                    return
+#             # 前向传播并检查每层输出
+#             x = inputs
+#             for name, module in model.named_children():
+#                 try:
+#                     x = module(x)
+#                 except Exception as e:
+#                     print(f"Error in module {name}: {e}")
+#                     return
 
-                # 检查中间结果是否为 NaN
-                if torch.isnan(x).any():
-                    print(f"NaN detected in module {name}'s output!")
-                    return
-                print(f"{name} output - min: {x.min()}, max: {x.max()}")
+#                 # 检查中间结果是否为 NaN
+#                 if torch.isnan(x).any():
+#                     print(f"NaN detected in module {name}'s output!")
+#                     return
+#                 print(f"{name} output - min: {x.min()}, max: {x.max()}")
             
-            print("Inference completed successfully!")
-            break  # 只测试一个批次
+#             print("Inference completed successfully!")
+#             break  # 只测试一个批次

@@ -13,11 +13,11 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device):
         loss = criterion(outputs, targets)
         loss.backward()
         # 打印有梯度更新的参数
-        print("Updated parameters and gradients:")
-        for name, param in model.named_parameters():
-            if param.grad is not None:
-                grad_norm = param.grad.norm().item()  # 梯度范数
-                print(f"Parameter: {name}, Gradient Norm: {grad_norm:.4f}")
+        # print("Updated parameters and gradients:")
+        # for name, param in model.named_parameters():
+        #     if param.grad is not None:
+        #         grad_norm = param.grad.norm().item()  # 梯度范数
+        #         print(f"Parameter: {name}, Gradient Norm: {grad_norm:.4f}")
 
         optimizer.step()
 

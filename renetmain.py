@@ -1,12 +1,12 @@
 from config import Config
 from data.dataloader import get_dataloaders
-from model import LFModel#,test_inference
 from train import train_one_epoch
 from validate import validate
 import torch
-from torch.optim import SGD
+from torch.optim import AdamW
 from torch.optim.lr_scheduler import StepLR
 from torch.nn import CrossEntropyLoss
+from torchvision import models
 from loguru import logger
 
 # 配置日志
@@ -27,34 +27,17 @@ def main():
         Config.NUM_WORKERS
     )
 
-    # 初始化模型
-    model = LFModel(
-        token_dim=Config.TOKEN_DIM,
-        channel_dim=Config.CHANNEL_DIM,
-        expert_dim=Config.EXPERT_DIM,
-        adapt_dim=Config.ADAPT_DIM,
-        num_experts=Config.NUM_EXPERTS
-    )
-    model.output_layer = torch.nn.Linear(Config.TOKEN_DIM, 200)  # TinyImageNet 有 200 个类别
+    # 初始化 ResNet 模型
+    model = models.resnet50(pretrained=True)  # 使用 ResNet50 作为实验
+    model.fc = torch.nn.Linear(model.fc.in_features, 200)  # 替换最后一层，适应 200 类
     model = model.to(Config.DEVICE)
-
-    ###############
-    #test_inference(model, train_loader, Config.DEVICE)
-    ###############
-
 
     # 损失函数和优化器
     criterion = CrossEntropyLoss()
-    # optimizer = SGD(
-    #     model.parameters(),
-    #     lr=Config.LEARNING_RATE,
-    #     momentum=Config.MOMENTUM,
-    #     weight_decay=Config.WEIGHT_DECAY
-    # )
-    optimizer = torch.optim.AdamW(
-    model.parameters(),
-    lr=0.0001,  # 初始学习率
-    weight_decay=1e-4  # 权重衰减
+    optimizer = AdamW(
+        model.parameters(),
+        lr=0.0001,  # 初始学习率
+        weight_decay=1e-4  # 权重衰减
     )
     scheduler = StepLR(optimizer, step_size=Config.STEP_SIZE, gamma=Config.GAMMA)
 
@@ -75,7 +58,7 @@ def main():
         logger.info(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
         logger.info(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
         if (epoch + 1) % Config.SAVE_FREQUENCY == 0:
-            save_path = f"{Config.CHECKPOINT_DIR}/lfmodel_epoch{epoch + 1}.pth"
+            save_path = f"{Config.CHECKPOINT_DIR}/resnet_epoch{epoch + 1}.pth"
             torch.save(model.state_dict(), save_path)
             logger.info(f"Model checkpoint saved at {save_path}")
 

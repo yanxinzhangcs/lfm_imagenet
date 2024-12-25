@@ -18,10 +18,10 @@ class Config:
 
     # 训练超参数
     NUM_EPOCHS = 90                              # 总训练轮数
-    LEARNING_RATE = 0.0001                         # 初始学习率
-    MOMENTUM = 0.9                               # SGD 动量参数
+    LEARNING_RATE = 1e-5                         # 初始学习率
+    MOMENTUM = 0.8                               # SGD 动量参数
     WEIGHT_DECAY = 1e-4                          # 权重衰减
-    STEP_SIZE = 30                               # 学习率衰减步长
+    STEP_SIZE = 10                               # 学习率衰减步长
     GAMMA = 0.1                                  # 学习率衰减因子
 
     # 设备
